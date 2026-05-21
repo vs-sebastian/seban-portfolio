@@ -1,18 +1,23 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
-import { useScroll, useTransform, motion } from "framer-motion";
+import React, { useEffect, useRef, useState, useCallback } from "react";
+import { useScroll, useTransform, motion, AnimatePresence } from "framer-motion";
 import Overlay from "./Overlay";
-
-const FRAME_COUNT = 120;
-const PRELOAD_BATCH_SIZE = 10;
+import { FRAME_COUNT } from "@/lib/sequence/config";
+import { drawFrameCover } from "@/lib/sequence/drawFrame";
+import { createSequenceLoader } from "@/lib/sequence/loadSequence";
 
 export default function ScrollyCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [images, setImages] = useState<HTMLImageElement[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const loaderRef = useRef<ReturnType<typeof createSequenceLoader> | null>(null);
+  const drawnIndexRef = useRef(-1);
+  const firstPaintRef = useRef(false);
+  const revealReadyRef = useRef(false);
+
   const [loadProgress, setLoadProgress] = useState(0);
+  const [showHero, setShowHero] = useState(false);
+  const [isFullyLoaded, setIsFullyLoaded] = useState(false);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -21,145 +26,165 @@ export default function ScrollyCanvas() {
 
   const frameIndex = useTransform(scrollYProgress, [0, 1], [0, FRAME_COUNT - 1]);
 
-  useEffect(() => {
-    let loadedCount = 0;
-    const loadedImages: HTMLImageElement[] = new Array(FRAME_COUNT);
-
-    const loadImages = async () => {
-      for (let i = 0; i < FRAME_COUNT; i++) {
-        const img = new Image();
-        // The images are named frame_000.webp through frame_119.webp
-        const indexStr = i.toString().padStart(3, "0");
-        img.src = `/sequence/frame_${indexStr}.webp`;
-
-        await new Promise((resolve) => {
-          img.onload = () => {
-            loadedImages[i] = img;
-            loadedCount++;
-            setLoadProgress((loadedCount / FRAME_COUNT) * 100);
-            resolve(null);
-          };
-          img.onerror = () => {
-            // Handle error, maybe fallback
-            loadedImages[i] = img; // We still assign it to avoid holes
-            loadedCount++;
-            resolve(null);
-          };
-        });
-      }
-
-      setImages(loadedImages);
-      setIsLoaded(true);
-    };
-
-    loadImages();
+  const tryReveal = useCallback(() => {
+    if (firstPaintRef.current && revealReadyRef.current) {
+      setShowHero(true);
+    }
   }, []);
 
-  useEffect(() => {
-    if (!isLoaded || images.length === 0) return;
-
+  const resizeCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = Math.floor(window.innerWidth * dpr);
+    const h = Math.floor(window.innerHeight * dpr);
 
-    let animationFrameId: number;
-    let currentDrawnIndex = -1;
+    canvas.width = w;
+    canvas.height = h;
+    canvas.style.width = `${window.innerWidth}px`;
+    canvas.style.height = `${window.innerHeight}px`;
+    drawnIndexRef.current = -1;
+  }, []);
 
-    const render = () => {
-      const targetIndex = Math.round(frameIndex.get());
-      
-      // Only draw if the index changed
-      if (targetIndex !== currentDrawnIndex && images[targetIndex] && images[targetIndex].complete) {
-        const img = images[targetIndex];
-        
-        // Handle object-fit: cover logic
-        const canvasRatio = canvas.width / canvas.height;
-        const imgRatio = img.width / img.height;
-        
-        let drawWidth, drawHeight, drawX, drawY;
+  const paintFrame = useCallback(
+    (index: number, loader: NonNullable<typeof loaderRef.current>) => {
+      const canvas = canvasRef.current;
+      if (!canvas) return false;
 
-        if (canvasRatio > imgRatio) {
-          // Canvas is wider than image
-          drawWidth = canvas.width;
-          drawHeight = canvas.width / imgRatio;
-          drawX = 0;
-          drawY = (canvas.height - drawHeight) / 2;
-        } else {
-          // Canvas is taller than image
-          drawHeight = canvas.height;
-          drawWidth = canvas.height * imgRatio;
-          drawY = 0;
-          drawX = (canvas.width - drawWidth) / 2;
-        }
+      const ctx = canvas.getContext("2d", { alpha: false });
+      if (!ctx) return false;
 
-        // Clear canvas
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        // Draw image
-        ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
-        currentDrawnIndex = targetIndex;
-      }
-      
-      animationFrameId = requestAnimationFrame(render);
-    };
+      const img = loader.getFrame(index);
+      if (!img) return false;
 
-    render();
-
-    return () => {
-      cancelAnimationFrame(animationFrameId);
-    };
-  }, [isLoaded, images, frameIndex]);
+      return drawFrameCover(ctx, canvas, img);
+    },
+    []
+  );
 
   useEffect(() => {
-    const handleResize = () => {
-      if (canvasRef.current) {
-        // Handle high DPI displays
-        const dpr = window.devicePixelRatio || 1;
-        // We set internal resolution higher
-        canvasRef.current.width = window.innerWidth * dpr;
-        canvasRef.current.height = window.innerHeight * dpr;
-        // But CSS size is the same
-        canvasRef.current.style.width = `${window.innerWidth}px`;
-        canvasRef.current.style.height = `${window.innerHeight}px`;
-        
-        // Force a re-render
-        if (isLoaded) {
-           // update frame trigger
-           frameIndex.set(frameIndex.get() + 0.0001);
+    resizeCanvas();
+
+    const loader = createSequenceLoader({
+      onProgress: setLoadProgress,
+      onHeroReady: () => {
+        resizeCanvas();
+        if (paintFrame(0, loader)) {
+          drawnIndexRef.current = 0;
+          firstPaintRef.current = true;
+          tryReveal();
+        }
+      },
+      onRevealReady: () => {
+        revealReadyRef.current = true;
+        tryReveal();
+      },
+      onFullyLoaded: () => setIsFullyLoaded(true),
+    });
+
+    loaderRef.current = loader;
+    return () => loader.cancel();
+  }, [tryReveal, paintFrame, resizeCanvas]);
+
+  useEffect(() => {
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas, { passive: true });
+    return () => window.removeEventListener("resize", resizeCanvas);
+  }, [resizeCanvas]);
+
+  // Paint loop — starts as soon as frame 0 is decoded (before full reveal)
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d", { alpha: false });
+    if (!ctx) return;
+
+    let rafId = 0;
+    let running = true;
+
+    const paint = () => {
+      if (!running) return;
+
+      const loader = loaderRef.current;
+      if (loader) {
+        const target = Math.round(frameIndex.get());
+        const resolved = loader.resolveFrameIndex(target);
+
+        if (resolved >= 0 && resolved !== drawnIndexRef.current) {
+          const img = loader.getFrame(resolved);
+          if (img && drawFrameCover(ctx, canvas, img)) {
+            drawnIndexRef.current = resolved;
+
+            if (!firstPaintRef.current) {
+              firstPaintRef.current = true;
+              tryReveal();
+            }
+          }
         }
       }
+
+      rafId = requestAnimationFrame(paint);
     };
 
-    window.addEventListener("resize", handleResize);
-    handleResize(); // init
+    rafId = requestAnimationFrame(paint);
 
-    return () => window.removeEventListener("resize", handleResize);
-  }, [isLoaded, frameIndex]);
+    return () => {
+      running = false;
+      cancelAnimationFrame(rafId);
+    };
+  }, [frameIndex, tryReveal]);
 
   return (
     <>
-      {!isLoaded && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#121212]">
-          <div className="text-white text-xl font-light tracking-widest mb-4">LOADING</div>
-          <div className="w-64 h-1 bg-white/20 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-white transition-all duration-300 ease-out" 
-              style={{ width: `${loadProgress}%` }}
-            />
-          </div>
-        </div>
-      )}
-      
-      <div id="home" ref={containerRef} className="relative h-[500vh] w-full bg-[#121212] scroll-mt-24">
-        <div className="sticky top-0 h-screen w-full overflow-hidden">
+      <AnimatePresence>
+        {!showHero && (
+          <motion.div
+            key="sequence-loader"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-[#121212]"
+          >
+            <div className="text-white text-xl font-light tracking-widest mb-4">
+              LOADING
+            </div>
+            <div className="w-64 h-1 bg-white/20 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-white transition-all duration-300 ease-out"
+                style={{ width: `${loadProgress}%` }}
+              />
+            </div>
+            {!isFullyLoaded && loadProgress > 0 && (
+              <p className="mt-4 text-white/40 text-xs font-light tracking-wide">
+                Buffering sequence…
+              </p>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div
+        id="home"
+        ref={containerRef}
+        className="relative h-[500vh] w-full bg-[#121212] scroll-mt-24"
+      >
+        <div className="sticky top-0 h-screen w-full overflow-hidden bg-[#121212]">
           <canvas
             ref={canvasRef}
-            className="absolute inset-0 z-0"
+            className="absolute inset-0 z-0 transition-opacity duration-700 ease-out"
+            style={{ opacity: showHero ? 1 : 0 }}
           />
-          <div className="absolute inset-0 z-10 bg-black/40" />
-          <Overlay scrollYProgress={scrollYProgress} />
+
+          <motion.div
+            className="absolute inset-0 z-10 bg-black/40"
+            initial={false}
+            animate={{ opacity: showHero ? 1 : 0 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          />
+
+          {showHero && <Overlay scrollYProgress={scrollYProgress} />}
         </div>
       </div>
     </>

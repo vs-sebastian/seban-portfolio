@@ -20,6 +20,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} antialiased`} style={{ scrollBehavior: 'smooth' }}>
+      <head>
+        <link
+          rel="preload"
+          href="/sequence/frame_000.webp"
+          as="image"
+          type="image/webp"
+          fetchPriority="high"
+        />
+      </head>
       <body className="bg-background text-foreground min-h-screen">
         <div className="noise" />
         <Navbar />
