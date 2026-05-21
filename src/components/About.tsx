@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 
 export default function About() {
   return (
-    <section className="py-32 px-6 md:px-24 bg-[#121212] relative z-20 overflow-hidden">
+    <section id="about" className="py-32 px-6 md:px-24 bg-[#121212] relative z-20 overflow-hidden scroll-mt-24">
       
       {/* Decorative ambient glow */}
       <div className="absolute top-1/2 left-0 w-96 h-96 bg-blue-500/10 rounded-full blur-[120px] -translate-y-1/2 -translate-x-1/2 pointer-events-none" />

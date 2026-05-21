@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 
 export default function Footer() {
   return (
-    <footer className="relative bg-[#0a0a0a] pt-32 pb-12 px-6 md:px-24 z-20 border-t border-white/5 overflow-hidden">
+    <footer id="contact" className="relative bg-[#0a0a0a] pt-32 pb-12 px-6 md:px-24 z-20 border-t border-white/5 overflow-hidden scroll-mt-24">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
       
       <div className="max-w-7xl mx-auto flex flex-col items-center text-center">
