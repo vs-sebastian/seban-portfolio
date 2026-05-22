@@ -11,7 +11,7 @@ const projects = [
     tags: ["UI/UX Design", "React", "Tailwind CSS"],
   },
   {
-    title: "Hitachi Datapoint Website Redesign",
+    title: "Datapoint Website Redesign",
     description: "A complete visual and structural overhaul to modernize the digital presence and improve user journeys.",
     tags: ["Web Design", "Figma", "Frontend"],
   },
@@ -36,7 +36,7 @@ export default function Projects() {
   return (
     <section id="projects" className="py-32 px-6 md:px-24 bg-[#121212] relative z-20 scroll-mt-24">
       <div className="max-w-7xl mx-auto">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
@@ -58,7 +58,7 @@ export default function Projects() {
               className="group relative p-[1px] rounded-2xl overflow-hidden bg-gradient-to-b from-white/10 to-transparent hover:from-white/30 transition-colors duration-500"
             >
               <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-500" />
-              
+
               <div className="relative h-full bg-[#161616] backdrop-blur-xl rounded-2xl p-8 flex flex-col z-10 border border-white/5 group-hover:border-white/10 transition-colors duration-500">
                 <div className="flex-grow">
                   <h3 className="text-2xl font-semibold text-white mb-4 group-hover:text-blue-200 transition-colors duration-300">
@@ -68,7 +68,7 @@ export default function Projects() {
                     {project.description}
                   </p>
                 </div>
-                
+
                 <div className="flex flex-wrap gap-2 mb-8">
                   {project.tags.map((tag, j) => (
                     <span key={j} className="text-xs font-medium px-3 py-1 bg-white/5 rounded-full text-white/70 border border-white/10">
