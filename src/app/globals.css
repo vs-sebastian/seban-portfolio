@@ -54,4 +54,22 @@ body {
   .glass {
     @apply bg-white/5 backdrop-blur-md border border-white/10;
   }
+
+  .navbar-dock-glow {
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.35),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 0 40px rgba(255, 255, 255, 0.03);
+  }
+}
+
+/* Anchor offset for fixed floating navbar */
+[id="home"],
+[id="projects"],
+[id="experiments"],
+[id="case-studies"],
+[id="process"],
+[id="about"],
+[id="contact"] {
+  scroll-margin-top: 5.5rem;
 }

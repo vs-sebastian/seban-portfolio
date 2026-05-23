@@ -11,7 +11,7 @@ const skills = [
 
 export default function Skills() {
   return (
-    <section className="py-32 px-6 md:px-24 bg-[#121212] relative z-20 overflow-hidden">
+    <section id="process" className="py-32 px-6 md:px-24 bg-[#121212] relative z-20 overflow-hidden scroll-mt-24">
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 40 }}

@@ -12,7 +12,7 @@ const interests = [
 
 export default function Creative() {
   return (
-    <section className="py-32 px-6 md:px-24 bg-[#121212] relative z-20 overflow-hidden">
+    <section id="experiments" className="py-32 px-6 md:px-24 bg-[#121212] relative z-20 overflow-hidden scroll-mt-24">
       
       {/* Decorative ambient glow */}
       <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[150px] pointer-events-none" />
