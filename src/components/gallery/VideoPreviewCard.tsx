@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Play } from "lucide-react";
 import type { ProjectSummary } from "@/lib/projects/types";
 import { cinematicEase } from "@/lib/motion";
+import OptimizedVideo from "@/components/media/OptimizedVideo";
 
 interface VideoPreviewCardProps {
   project: ProjectSummary;
@@ -54,12 +55,11 @@ export default function VideoPreviewCard({
       >
         <div className="relative aspect-video bg-black">
           {src && (
-            <video
+            <OptimizedVideo
               ref={videoRef}
               src={src}
               muted
               loop
-              playsInline
               preload="metadata"
               className="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity duration-500"
             />

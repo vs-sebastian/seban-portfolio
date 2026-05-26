@@ -91,6 +91,7 @@ export default function ViewerStage({
                   controls
                   autoPlay
                   playsInline
+                  preload="metadata"
                   className="max-w-[min(96vw,1400px)] max-h-[78vh] w-auto h-auto rounded-2xl shadow-2xl pointer-events-auto"
                 />
               )}

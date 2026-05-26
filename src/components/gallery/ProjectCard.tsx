@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import type { ProjectSummary } from "@/lib/projects/types";
 import { cinematicEase } from "@/lib/motion";
+import OptimizedVideo from "@/components/media/OptimizedVideo";
 
 interface ProjectCardProps {
   project: ProjectSummary;
@@ -52,12 +53,11 @@ export default function ProjectCard({
                 />
               )}
               {cover?.kind === "video" && (
-                <video
+                <OptimizedVideo
                   src={cover.src}
+                  lazy
                   muted
                   loop
-                  playsInline
-                  preload="metadata"
                   className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500"
                 />
               )}

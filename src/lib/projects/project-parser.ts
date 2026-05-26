@@ -16,7 +16,11 @@ import {
   pickCover,
 } from "./media-analyzer";
 import { getProjectsDir, toPublicSrc } from "./paths";
-import { slugify, titleFromFileName, titleFromSlug } from "./slug";
+import { slugify, titleFromFileName } from "./slug";
+import {
+  buildVideoProjectsFromCloudinary,
+  resolveVideoSrc,
+} from "./video-sources";
 
 let cache: {
   categories: Category[];
@@ -47,9 +51,13 @@ function walkMediaFiles(
       continue;
     }
 
-    if (getMediaKind(abs)) {
-      acc.push({ absPath: abs, publicPath: pub });
-    }
+    const kind = getMediaKind(abs);
+    if (!kind) continue;
+
+    // Videos are hosted on Cloudinary — skip local video files in the walk
+    if (kind === "video") continue;
+
+    acc.push({ absPath: abs, publicPath: pub });
   }
 
   return acc;
@@ -76,6 +84,19 @@ function buildAsset(
     } catch {
       /* use defaults */
     }
+  }
+
+  if (kind === "video") {
+    const remote = resolveVideoSrc(fileName);
+    if (!remote) return null;
+    return {
+      id: slugify(`${fileName}-${order}`),
+      kind: "video",
+      src: remote,
+      fileName,
+      orientation: orientationFromDimensions(width, height),
+      order,
+    };
   }
 
   return {
@@ -139,6 +160,10 @@ function parseCategoryFolder(
   category: CategoryDefinition,
   categoryPath: string
 ): Project[] {
+  if (category.slug === "videos") {
+    return buildVideoProjectsFromCloudinary(category);
+  }
+
   const projects: Project[] = [];
   if (!fs.existsSync(categoryPath)) return projects;
 
@@ -166,34 +191,10 @@ function parseCategoryFolder(
   }
 
   if (looseFiles.length > 0) {
-    const videos = looseFiles.filter((f) => getMediaKind(f.name) === "video");
     const images = looseFiles.filter((f) => getMediaKind(f.name) === "image");
     const presentations = looseFiles.filter(
       (f) => getMediaKind(f.name) === "presentation"
     );
-
-    for (const file of videos) {
-      const title = titleFromFileName(file.name);
-      const projectSlug = slugify(title);
-      const publicPrefix = `images/projects/${category.folderName}`;
-      const media = [buildAsset(path.join(categoryPath, file.name), `${publicPrefix}/${file.name}`, 0)].filter(
-        (a): a is MediaAsset => a !== null
-      );
-      if (media.length === 0) continue;
-
-      projects.push({
-        slug: projectSlug,
-        title,
-        categorySlug: category.slug,
-        categoryTitle: category.title,
-        layout: "video",
-        cover: media[0],
-        mediaCount: 1,
-        description: `Cinematic piece — ${title}.`,
-        tags: buildTags(category, "video", title),
-        media,
-      });
-    }
 
     if (images.length > 0 && category.slug === "graphic-design") {
       const publicPrefix = `images/projects/${category.folderName}`;

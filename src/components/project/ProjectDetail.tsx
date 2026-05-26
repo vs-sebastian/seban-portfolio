@@ -7,6 +7,7 @@ import { Play, Maximize2, FileText } from "lucide-react";
 import type { Project } from "@/lib/projects/types";
 import { cinematicEase } from "@/lib/motion";
 import ImmersiveViewer from "@/components/viewer/ImmersiveViewer";
+import OptimizedVideo from "@/components/media/OptimizedVideo";
 
 interface ProjectDetailProps {
   project: Project;
@@ -65,11 +66,11 @@ export default function ProjectDetail({ project }: ProjectDetailProps) {
           />
         )}
         {project.cover?.kind === "video" && (
-          <video
+          <OptimizedVideo
             src={project.cover.src}
+            preload="metadata"
             muted
             loop
-            playsInline
             className="absolute inset-0 w-full h-full object-cover"
           />
         )}
