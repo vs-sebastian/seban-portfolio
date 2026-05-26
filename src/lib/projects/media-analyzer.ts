@@ -1,6 +1,7 @@
 import path from "path";
 import type { LayoutVariant, MediaAsset, MediaKind, Orientation } from "./types";
 import {
+  EXCLUDED_EXTENSIONS,
   IMAGE_EXTENSIONS,
   PRESENTATION_EXTENSIONS,
   VIDEO_EXTENSIONS,
@@ -13,6 +14,7 @@ export function getExtension(filePath: string): string {
 
 export function getMediaKind(filePath: string): MediaKind | null {
   const ext = getExtension(filePath);
+  if (EXCLUDED_EXTENSIONS.has(ext)) return null;
   if (IMAGE_EXTENSIONS.has(ext)) return "image";
   if (VIDEO_EXTENSIONS.has(ext)) return "video";
   if (PRESENTATION_EXTENSIONS.has(ext)) return "presentation";

@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
+import SafeImage from "@/components/media/SafeImage";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import type { Category } from "@/lib/projects/types";
@@ -27,7 +27,7 @@ export default function ProjectsHub({ categories }: ProjectsHubProps) {
           >
             <div className="relative aspect-[16/9] bg-[#0a0a0a] overflow-hidden">
               {cat.cover?.kind === "image" && (
-                <Image
+                <SafeImage
                   src={cat.cover.src}
                   alt={cat.title}
                   fill

@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
+import SafeImage from "@/components/media/SafeImage";
 import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import type { ProjectSummary } from "@/lib/projects/types";
@@ -43,7 +43,7 @@ export default function ProjectCard({
           <div className="relative rounded-2xl overflow-hidden bg-[#161616] border border-white/5 group-hover:border-white/15 transition-colors duration-500">
             <div className={`relative w-full ${aspect} bg-[#0d0d0d] overflow-hidden`}>
               {cover?.kind === "image" && (
-                <Image
+                <SafeImage
                   src={cover.src}
                   alt={project.title}
                   fill

@@ -1,10 +1,7 @@
 export * from "./types";
 export * from "./constants";
-export {
-  resolveVideoSrc,
-  isRemoteVideoSrc,
-  VIDEO_CATALOG,
-} from "./video-sources";
+export * from "./category-overrides";
+export { discoverCategoryDefinitions } from "./discover-categories";
 export {
   getAllCategories,
   getAllProjects,
@@ -14,4 +11,11 @@ export {
   getFeaturedProjects,
   getAllCategorySlugs,
   getAllProjectParams,
+  refreshProjectCache,
 } from "./project-parser";
+export {
+  CLOUDINARY_VIDEO_CATALOG,
+  resolveVideoSrc,
+  isRemoteVideoSrc,
+  getCloudinaryVideoByUrl,
+} from "./video-sources";

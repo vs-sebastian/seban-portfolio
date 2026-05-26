@@ -1,22 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { motion } from "framer-motion";
+import SafeImage from "@/components/media/SafeImage";
 import { ArrowRight } from "lucide-react";
 import type { ProjectSummary } from "@/lib/projects/types";
-import { CATEGORIES } from "@/lib/projects/constants";
+
+export interface CategoryLink {
+  label: string;
+  href: string;
+}
 
 interface ProjectsProps {
   featured: ProjectSummary[];
+  categoryLinks: CategoryLink[];
 }
 
-const categoryLinks = CATEGORIES.map((c) => ({
-  label: c.title,
-  href: `/projects/${c.slug}`,
-}));
-
-export default function Projects({ featured }: ProjectsProps) {
+export default function Projects({ featured, categoryLinks }: ProjectsProps) {
   return (
     <section id="projects" className="py-32 px-6 md:px-24 bg-[#121212] relative z-20 scroll-mt-24">
       <div className="max-w-7xl mx-auto">
@@ -70,7 +70,7 @@ export default function Projects({ featured }: ProjectsProps) {
                 <div className="relative h-full bg-[#161616] backdrop-blur-xl rounded-2xl overflow-hidden border border-white/5 group-hover:border-white/10 transition-colors duration-500 flex flex-col">
                   {project.cover?.kind === "image" && (
                     <div className="relative aspect-[16/10] bg-[#0d0d0d]">
-                      <Image
+                      <SafeImage
                         src={project.cover.src}
                         alt={project.title}
                         fill

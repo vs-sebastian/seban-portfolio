@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
-import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import SafeImage from "@/components/media/SafeImage";
 import type { MediaAsset } from "@/lib/projects/types";
 import { cinematicEase } from "@/lib/motion";
 import type { useViewerZoom } from "@/hooks/useViewerZoom";
@@ -71,7 +71,7 @@ export default function ViewerStage({
             >
               {asset.kind === "image" && (
                 <div className="relative w-full h-full max-w-[min(96vw,1400px)] max-h-[78vh] mx-auto pointer-events-none">
-                  <Image
+                  <SafeImage
                     src={asset.src}
                     alt={asset.fileName}
                     fill

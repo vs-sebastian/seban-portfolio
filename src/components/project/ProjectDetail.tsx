@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { motion } from "framer-motion";
+import SafeImage from "@/components/media/SafeImage";
 import { Play, Maximize2, FileText } from "lucide-react";
 import type { Project } from "@/lib/projects/types";
 import { cinematicEase } from "@/lib/motion";
@@ -56,7 +56,7 @@ export default function ProjectDetail({ project }: ProjectDetailProps) {
         className="group relative w-full aspect-[16/9] md:aspect-[21/9] rounded-3xl overflow-hidden border border-white/10 mb-12 bg-[#0a0a0a]"
       >
         {project.cover?.kind === "image" && (
-          <Image
+          <SafeImage
             src={project.cover.src}
             alt={project.title}
             fill
@@ -110,7 +110,7 @@ export default function ProjectDetail({ project }: ProjectDetailProps) {
             }`}
           >
             {item.kind === "image" && (
-              <Image
+              <SafeImage
                 src={item.src}
                 alt={item.fileName}
                 fill

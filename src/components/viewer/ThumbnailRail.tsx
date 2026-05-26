@@ -1,7 +1,6 @@
 "use client";
 
-import Image from "next/image";
-import { motion } from "framer-motion";
+import SafeImage from "@/components/media/SafeImage";
 import type { MediaAsset } from "@/lib/projects/types";
 
 interface ThumbnailRailProps {
@@ -29,7 +28,7 @@ export default function ThumbnailRail({
           }`}
         >
           {item.kind === "image" && (
-            <Image
+            <SafeImage
               src={item.src}
               alt=""
               fill
