@@ -19,6 +19,11 @@ import {
   CLOUDINARY_VIDEO_CATALOG,
   resolveVideoSrc,
 } from "./video-sources";
+import {
+  applyProjectOverrides,
+  isPortfolioShowcaseProject,
+  PORTFOLIO_SHOWCASE_SLUG,
+} from "./project-overrides";
 
 let cache: {
   categories: Category[];
@@ -187,7 +192,7 @@ function buildProjectFromMedia(
     media.map((m) => ({ kind: m.kind, relativePath: m.src }))
   );
 
-  return {
+  return applyProjectOverrides({
     slug: projectSlug,
     title,
     categorySlug: category.slug,
@@ -200,7 +205,7 @@ function buildProjectFromMedia(
       `${category.title} — ${media.length} asset${media.length === 1 ? "" : "s"}.`,
     tags: buildTags(category, layout, title),
     media,
-  };
+  });
 }
 
 function buildProjectFromFolder(
@@ -482,27 +487,44 @@ function hasValidCover(project: Project | ProjectSummary): boolean {
   );
 }
 
-export function getFeaturedProjects(limit = 5): ProjectSummary[] {
+export function getFeaturedProjects(limit = 6): ProjectSummary[] {
   const categories = getAllCategories();
   const picked: ProjectSummary[] = [];
+  const portfolio = getAllProjects().find(
+    (p) => p.slug === PORTFOLIO_SHOWCASE_SLUG && hasValidCover(p)
+  );
+  const reservedSlots = portfolio && limit > 1 ? 1 : 0;
+  const categorySlots = Math.max(0, limit - reservedSlots);
 
   for (const cat of categories) {
-    const projects = getProjectsByCategory(cat.slug).filter(hasValidCover);
+    const projects = getProjectsByCategory(cat.slug)
+      .filter(hasValidCover)
+      .filter((p) => !isPortfolioShowcaseProject(p));
     if (projects[0]) {
       const { media, ...summary } = projects[0];
       picked.push(summary);
     }
-    if (picked.length >= limit) break;
+    if (picked.length >= categorySlots) break;
   }
 
   const remaining = getAllProjects()
-    .filter((p) => hasValidCover(p) && !picked.some((x) => x.slug === p.slug))
-    .slice(0, limit - picked.length);
+    .filter(
+      (p) =>
+        hasValidCover(p) &&
+        !isPortfolioShowcaseProject(p) &&
+        !picked.some((x) => x.slug === p.slug && x.categorySlug === p.categorySlug)
+    )
+    .slice(0, categorySlots - picked.length);
 
   for (const p of remaining) {
     const { media, ...summary } = p;
     picked.push(summary);
-    if (picked.length >= limit) break;
+    if (picked.length >= categorySlots) break;
+  }
+
+  if (portfolio && picked.length < limit) {
+    const { media, ...summary } = portfolio;
+    picked.push(summary);
   }
 
   return picked.slice(0, limit);
