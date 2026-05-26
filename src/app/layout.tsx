@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Navbar } from "@/components/navbar";
+import RouteScrollManager from "@/components/navigation/RouteScrollManager";
+import HomeRoutePrefetch from "@/components/navigation/HomeRoutePrefetch";
 import "./globals.css";
 
 const inter = Inter({
@@ -32,6 +34,8 @@ export default function RootLayout({
       <body className="bg-background text-foreground min-h-screen">
         <div className="noise" />
         <Navbar />
+        <RouteScrollManager />
+        <HomeRoutePrefetch />
         {children}
       </body>
     </html>

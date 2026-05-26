@@ -27,6 +27,30 @@ let cache: {
   bySlug: Map<string, Project>;
 } | null = null;
 
+let cacheSourceMtime = 0;
+
+/** Dev-only: invalidate parser cache when project folders change (not every navigation). */
+function getProjectsSourceMtime(): number {
+  const root = getProjectsDir();
+  if (!fs.existsSync(root)) return 0;
+
+  let max = 0;
+  try {
+    max = fs.statSync(root).mtimeMs;
+    for (const entry of fs.readdirSync(root, { withFileTypes: true })) {
+      if (!entry.isDirectory() || entry.name.startsWith(".")) continue;
+      try {
+        max = Math.max(max, fs.statSync(path.join(root, entry.name)).mtimeMs);
+      } catch {
+        /* skip */
+      }
+    }
+  } catch {
+    return 0;
+  }
+  return max;
+}
+
 function shouldSkipDir(name: string): boolean {
   return SKIP_FOLDER_PATTERN.test(name);
 }
@@ -416,6 +440,11 @@ function loadAll(): void {
 
 function ensureCache() {
   if (process.env.NODE_ENV === "development") {
+    const mtime = getProjectsSourceMtime();
+    if (cache && cacheSourceMtime === mtime) {
+      return cache;
+    }
+    cacheSourceMtime = mtime;
     cache = null;
   }
   if (!cache) loadAll();

@@ -1,5 +1,5 @@
 import React from "react";
-import ScrollyCanvas from "@/components/ScrollyCanvas";
+import ScrollyCanvas from "@/components/home/ScrollyCanvasDynamic";
 import Projects from "@/components/Projects";
 import { getAllCategories, getFeaturedProjects } from "@/lib/projects";
 import About from "@/components/About";

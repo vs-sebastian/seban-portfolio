@@ -1,5 +1,5 @@
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import NavBackLink from "@/components/navigation/NavBackLink";
+import { HOME_HREF } from "@/lib/navigation/scroll";
 
 interface PageShellProps {
   title: string;
@@ -16,17 +16,13 @@ export default function PageShell({
   backLabel = "All Projects",
   children,
 }: PageShellProps) {
+  const resolvedBackHref = backHref === "/" ? HOME_HREF : backHref;
+
   return (
     <main className="min-h-screen bg-[#121212] text-white pt-28 pb-24 px-6 md:px-16 lg:px-24 relative z-20">
       <div className="absolute top-32 left-0 w-96 h-96 bg-blue-500/5 rounded-full blur-[120px] pointer-events-none" />
       <div className="max-w-7xl mx-auto relative">
-        <Link
-          href={backHref}
-          className="inline-flex items-center gap-2 text-sm text-white/50 hover:text-white/90 transition-colors mb-10 group"
-        >
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-          {backLabel}
-        </Link>
+        <NavBackLink href={resolvedBackHref} label={backLabel} />
 
         <header className="mb-16 md:mb-20">
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-4">

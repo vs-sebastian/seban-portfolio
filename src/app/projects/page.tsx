@@ -15,7 +15,7 @@ export default function ProjectsPage() {
     <PageShell
       title="Project Gallery"
       subtitle="An immersive exhibition of product design, visual craft, motion, and strategic case studies — dynamically composed from the studio archive."
-      backHref="/"
+      backHref="/#home"
       backLabel="Back to Home"
     >
       <ProjectsHub categories={categories} />
