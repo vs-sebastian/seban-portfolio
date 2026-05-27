@@ -1,6 +1,7 @@
 import type { Project } from "./types";
 
 export interface ProjectOverride {
+  categoryTitle?: string;
   title?: string;
   description?: string;
   tags?: string[];
@@ -8,16 +9,17 @@ export interface ProjectOverride {
 
 /** Premium copy for curated projects (key: categorySlug/projectSlug). */
 export const PROJECT_OVERRIDES: Record<string, ProjectOverride> = {
-  "ui-ux-product-design/sebastian-vs-cinematic-portfolio": {
-    title: "Sebastian VS — Cinematic Portfolio",
+  "ui-development/sebastian-vs-cinematic-portfolio": {
+    categoryTitle: "UI DEVELOPMENT",
+    title: "Sebastian VS — Cinematic Next.js Portfolio",
     description:
-      "A scroll-orchestrated personal showcase—frame-synced hero storytelling, glass navigation, and immersive project galleries built as one cohesive cinematic experience.",
-    tags: ["UI/UX", "Frontend", "Motion", "Scrollytelling"],
+      "A cinematic scrollytelling portfolio engineered with Next.js, TypeScript, Framer Motion, and HTML5 Canvas — featuring frame-synced hero sequences, immersive glassmorphism UI, dynamic media architecture, and premium interactive storytelling.",
+    tags: ["Next.js", "TypeScript", "Framer Motion", "HTML5 Canvas"],
   },
 };
 
 export const PORTFOLIO_SHOWCASE_SLUG = "sebastian-vs-cinematic-portfolio";
-export const PORTFOLIO_SHOWCASE_CATEGORY = "ui-ux-product-design";
+export const PORTFOLIO_SHOWCASE_CATEGORY = "ui-development";
 
 export function applyProjectOverrides(project: Project): Project {
   const key = `${project.categorySlug}/${project.slug}`;
@@ -26,6 +28,7 @@ export function applyProjectOverrides(project: Project): Project {
 
   return {
     ...project,
+    categoryTitle: override.categoryTitle ?? project.categoryTitle,
     title: override.title ?? project.title,
     description: override.description ?? project.description,
     tags: override.tags ?? project.tags,

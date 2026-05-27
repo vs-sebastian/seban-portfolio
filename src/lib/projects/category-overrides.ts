@@ -16,6 +16,15 @@ export interface CategoryOverride {
 }
 
 export const CATEGORY_OVERRIDES: Record<string, CategoryOverride> = {
+  "UI Development": {
+    slug: "ui-development",
+    title: "UI Development",
+    description:
+      "Cinematic UI engineering — Next.js builds, motion systems, and immersive front-end craft.",
+    layout: "ui-showcase",
+    tags: ["Next.js", "Frontend", "Motion", "Engineering"],
+    order: 1,
+  },
   "UI-UX and Product Designs": {
     slug: "ui-ux-product-design",
     title: "UI/UX Product Design",
@@ -23,7 +32,7 @@ export const CATEGORY_OVERRIDES: Record<string, CategoryOverride> = {
       "Spatial product interfaces, dashboards, and mobile experiences crafted with precision.",
     layout: "ui-showcase",
     tags: ["UI/UX", "Product Design", "Dashboards"],
-    order: 1,
+    order: 2,
   },
   "Graphic Design Works": {
     slug: "graphic-design",
@@ -32,7 +41,7 @@ export const CATEGORY_OVERRIDES: Record<string, CategoryOverride> = {
       "Editorial compositions, brand visuals, and expressive design explorations.",
     layout: "editorial",
     tags: ["Branding", "Print", "Visual Design"],
-    order: 2,
+    order: 3,
   },
   Videos: {
     slug: "videos",
@@ -41,7 +50,7 @@ export const CATEGORY_OVERRIDES: Record<string, CategoryOverride> = {
       "Cinematic edits, motion campaigns, and immersive moving-image stories.",
     layout: "video",
     tags: ["Motion", "Editing", "Cinematic"],
-    order: 3,
+    order: 4,
   },
   "Power Point designs": {
     slug: "powerpoint-design",
@@ -50,7 +59,7 @@ export const CATEGORY_OVERRIDES: Record<string, CategoryOverride> = {
       "Presentation systems and narrative slide experiences built for clarity and impact.",
     layout: "presentation",
     tags: ["Presentations", "Storytelling", "Decks"],
-    order: 4,
+    order: 5,
   },
   "Case Study": {
     slug: "case-study",
@@ -59,7 +68,7 @@ export const CATEGORY_OVERRIDES: Record<string, CategoryOverride> = {
       "End-to-end design journeys — strategy, structure, and shipped outcomes.",
     layout: "case-study",
     tags: ["Case Study", "UX Strategy", "Process"],
-    order: 5,
+    order: 6,
   },
 };
 
