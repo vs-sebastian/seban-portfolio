@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import SafeImage from "@/components/media/SafeImage";
+import OptimizedVideo from "@/components/media/OptimizedVideo";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import type { Category } from "@/lib/projects/types";
@@ -33,6 +34,18 @@ export default function ProjectsHub({ categories }: ProjectsHubProps) {
                   fill
                   sizes="(max-width: 768px) 100vw, 50vw"
                   className="object-cover opacity-60 group-hover:opacity-80 group-hover:scale-[1.02] transition-all duration-700"
+                />
+              )}
+              {cat.cover?.kind === "video" && (
+                <OptimizedVideo
+                  src={cat.cover.src}
+                  lazy
+                  muted
+                  loop
+                  autoPlay
+                  playsInline
+                  preload="metadata"
+                  className="absolute inset-0 w-full h-full object-cover object-center opacity-70 group-hover:opacity-95 group-hover:scale-[1.02] transition-all duration-700"
                 />
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-[#121212] via-[#121212]/40 to-transparent" />
