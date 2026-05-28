@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import SafeImage from "@/components/media/SafeImage";
+import OptimizedVideo from "@/components/media/OptimizedVideo";
 import { ArrowRight } from "lucide-react";
 import type { ProjectSummary } from "@/lib/projects/types";
 
@@ -75,7 +76,21 @@ export default function Projects({ featured, categoryLinks }: ProjectsProps) {
                         alt={project.title}
                         fill
                         sizes="(max-width: 768px) 100vw, 33vw"
-                        className="object-contain object-center group-hover:scale-[1.02] transition-transform duration-700"
+                        className="object-cover object-center group-hover:scale-[1.02] transition-transform duration-700"
+                      />
+                    </div>
+                  )}
+                  {project.cover?.kind === "video" && (
+                    <div className="relative aspect-[16/10] bg-[#0d0d0d]">
+                      <OptimizedVideo
+                        src={project.cover.src}
+                        lazy
+                        muted
+                        loop
+                        autoPlay
+                        playsInline
+                        preload="metadata"
+                        className="absolute inset-0 w-full h-full object-cover object-center opacity-75 group-hover:opacity-100 group-hover:scale-[1.02] transition-all duration-700"
                       />
                     </div>
                   )}

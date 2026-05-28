@@ -22,6 +22,7 @@ import {
 import {
   applyProjectOverrides,
   isPortfolioShowcaseProject,
+  PORTFOLIO_SHOWCASE_CATEGORY,
   PORTFOLIO_SHOWCASE_SLUG,
 } from "./project-overrides";
 
@@ -490,8 +491,14 @@ function hasValidCover(project: Project | ProjectSummary): boolean {
 export function getFeaturedProjects(limit = 6): ProjectSummary[] {
   const categories = getAllCategories();
   const picked: ProjectSummary[] = [];
+  const preferredByCategory: Record<string, string> = {
+    videos: "fusion-treats-ad",
+  };
   const portfolio = getAllProjects().find(
-    (p) => p.slug === PORTFOLIO_SHOWCASE_SLUG && hasValidCover(p)
+    (p) =>
+      p.categorySlug === PORTFOLIO_SHOWCASE_CATEGORY &&
+      p.slug === PORTFOLIO_SHOWCASE_SLUG &&
+      hasValidCover(p)
   );
   const reservedSlots = portfolio && limit > 1 ? 1 : 0;
   const categorySlots = Math.max(0, limit - reservedSlots);
@@ -500,8 +507,12 @@ export function getFeaturedProjects(limit = 6): ProjectSummary[] {
     const projects = getProjectsByCategory(cat.slug)
       .filter(hasValidCover)
       .filter((p) => !isPortfolioShowcaseProject(p));
-    if (projects[0]) {
-      const { media, ...summary } = projects[0];
+    const preferredSlug = preferredByCategory[cat.slug];
+    const selected = preferredSlug
+      ? projects.find((p) => p.slug === preferredSlug) ?? projects[0]
+      : projects[0];
+    if (selected) {
+      const { media, ...summary } = selected;
       picked.push(summary);
     }
     if (picked.length >= categorySlots) break;

@@ -14,9 +14,7 @@ interface ProjectCardProps {
   priority?: boolean;
 }
 
-function aspectClass(orientation?: string): string {
-  if (orientation === "portrait") return "aspect-[3/4]";
-  if (orientation === "square") return "aspect-square";
+function aspectClass(_orientation?: string): string {
   return "aspect-[16/10]";
 }
 
@@ -49,7 +47,7 @@ export default function ProjectCard({
                   fill
                   priority={priority}
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  className="object-contain object-center transition-transform duration-700 group-hover:scale-[1.03]"
+                  className="object-cover object-center transition-transform duration-700 group-hover:scale-[1.03]"
                 />
               )}
               {cover?.kind === "video" && (
