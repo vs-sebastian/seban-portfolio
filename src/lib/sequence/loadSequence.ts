@@ -67,14 +67,22 @@ function buildLoadOrder(): number[] {
 
 const LOAD_ORDER = buildLoadOrder();
 
-export function createSequenceLoader(callbacks: SequenceLoaderCallbacks) {
-  const slots: FrameSlot[] = Array.from({ length: FRAME_COUNT }, () => ({
-    image: null,
-    ready: false,
-  }));
+export function createSequenceLoader(
+  callbacks: SequenceLoaderCallbacks,
+  existingSlots?: FrameSlot[]
+) {
+  const slots: FrameSlot[] =
+    existingSlots ??
+    Array.from({ length: FRAME_COUNT }, () => ({
+      image: null,
+      ready: false,
+    }));
 
-  let heroReady = false;
-  let revealReady = false;
+  const reusing = Boolean(existingSlots);
+  let heroReady = slots[0]?.ready ?? false;
+  let revealReady =
+    slots.slice(0, MIN_FRAMES_FOR_REVEAL).filter((s) => s.ready).length >=
+    MIN_FRAMES_FOR_REVEAL;
   let cancelled = false;
 
   const reportProgress = () => {
@@ -96,10 +104,11 @@ export function createSequenceLoader(callbacks: SequenceLoaderCallbacks) {
       revealReady = true;
       callbacks.onRevealReady();
     }
-
   };
 
   const loadIndex = async (index: number) => {
+    if (slots[index]?.ready) return;
+
     const img = await loadAndDecode(index);
     if (cancelled) return;
 
@@ -111,11 +120,24 @@ export function createSequenceLoader(callbacks: SequenceLoaderCallbacks) {
   };
 
   const run = async () => {
-    await loadIndex(0);
+    const pending = LOAD_ORDER.filter((idx) => !slots[idx]?.ready);
+    if (pending.length === 0) {
+      reportProgress();
+      checkMilestones();
+      callbacks.onFullyLoaded();
+      return;
+    }
 
-    let i = 1;
-    while (i < LOAD_ORDER.length && !cancelled) {
-      const batch = LOAD_ORDER.slice(i, i + PRELOAD_BATCH_SIZE);
+    if (!slots[0]?.ready) {
+      await loadIndex(0);
+    } else {
+      reportProgress();
+      checkMilestones();
+    }
+
+    let i = pending.indexOf(0) >= 0 ? 1 : 0;
+    while (i < pending.length && !cancelled) {
+      const batch = pending.slice(i, i + PRELOAD_BATCH_SIZE);
       i += PRELOAD_BATCH_SIZE;
       await Promise.all(batch.map((idx) => loadIndex(idx)));
     }
@@ -125,7 +147,18 @@ export function createSequenceLoader(callbacks: SequenceLoaderCallbacks) {
     }
   };
 
-  void run();
+  if (reusing) {
+    reportProgress();
+    checkMilestones();
+    const allReady = slots.every((s) => s.ready);
+    if (allReady) {
+      callbacks.onFullyLoaded();
+    } else {
+      void run();
+    }
+  } else {
+    void run();
+  }
 
   return {
     slots,
@@ -149,3 +182,5 @@ export function createSequenceLoader(callbacks: SequenceLoaderCallbacks) {
     },
   };
 }
+
+export type SequenceLoader = ReturnType<typeof createSequenceLoader>;

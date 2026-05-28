@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { motion, useMotionValue, useSpring } from "framer-motion";
+import { usePathname } from "next/navigation";
 import { useRef } from "react";
 import type { NavItem } from "@/config/navigation";
+import { HOME_HREF, isHomeHref, scrollToHome } from "@/lib/navigation/scroll";
 
 interface NavLinkProps {
   item: NavItem;
@@ -22,8 +24,10 @@ export default function NavLink({
   layoutId = "nav-active-pill",
   className = "",
 }: NavLinkProps) {
+  const pathname = usePathname();
   const ref = useRef<HTMLAnchorElement>(null);
   const x = useMotionValue(0);
+  const homeLink = isHomeHref(item.href);
   const y = useMotionValue(0);
   const springX = useSpring(x, { stiffness: 350, damping: 30 });
   const springY = useSpring(y, { stiffness: 350, damping: 30 });
@@ -50,8 +54,16 @@ export default function NavLink({
     >
       <Link
         ref={ref}
-        href={item.href}
-        onClick={onSelect}
+        href={homeLink ? HOME_HREF : item.href}
+        prefetch={homeLink ? true : undefined}
+        scroll={!homeLink}
+        onClick={(e) => {
+          if (homeLink && pathname === "/") {
+            e.preventDefault();
+            scrollToHome();
+          }
+          onSelect?.();
+        }}
         onPointerMove={handlePointerMove}
         onPointerLeave={resetMagnetic}
         className={`relative z-10 block px-3.5 py-2 text-[13px] md:text-[14px] font-medium tracking-wide transition-colors duration-300 rounded-full ${

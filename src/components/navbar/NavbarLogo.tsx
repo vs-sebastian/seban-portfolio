@@ -1,12 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { motion } from "framer-motion";
+import HomeLink from "@/components/navigation/HomeLink";
 
 export default function NavbarLogo() {
   return (
-    <Link
-      href="#home"
+    <HomeLink
       className="group flex items-center gap-2.5 shrink-0"
       aria-label="Sebastian VS — Home"
     >
@@ -24,6 +23,6 @@ export default function NavbarLogo() {
       <span className="hidden lg:block text-[13px] font-medium text-white/50 group-hover:text-white/80 transition-colors duration-300 tracking-wide">
         Sebastian VS
       </span>
-    </Link>
+    </HomeLink>
   );
 }

@@ -1,12 +1,35 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import type { NavItemId } from "@/config/navigation";
 import { NAV_ITEMS, SECTION_IDS } from "@/config/navigation";
 
 const SECTION_TO_NAV = Object.fromEntries(
-  NAV_ITEMS.map((item) => [item.sectionId, item.id])
+  NAV_ITEMS.filter((item) => item.sectionId).map((item) => [
+    item.sectionId!,
+    item.id,
+  ])
 ) as Record<string, NavItemId>;
+
+const ROUTE_TO_NAV: Partial<Record<string, NavItemId>> = {
+  "/projects": "projects",
+  "/projects/videos": "experiments",
+  "/projects/case-study": "case-studies",
+  "/projects/ui-ux-product-design": "process",
+  "/projects/graphic-design": "projects",
+  "/projects/powerpoint-design": "projects",
+};
+
+function getActiveFromPath(pathname: string): NavItemId | null {
+  if (pathname === "/") return null;
+  if (ROUTE_TO_NAV[pathname]) return ROUTE_TO_NAV[pathname]!;
+  if (pathname.startsWith("/projects/case-study")) return "case-studies";
+  if (pathname.startsWith("/projects/videos")) return "experiments";
+  if (pathname.startsWith("/projects/ui-ux")) return "process";
+  if (pathname.startsWith("/projects")) return "projects";
+  return null;
+}
 
 function getActiveSectionId(): NavItemId {
   const line = window.innerHeight * 0.35;
@@ -30,14 +53,22 @@ function getActiveSectionId(): NavItemId {
   return SECTION_TO_NAV[closestId] ?? "home";
 }
 
-/**
- * Tracks active section from viewport position — single rAF-throttled
- * scroll listener, separate from the canvas render loop.
- */
 export function useActiveSection() {
+  const pathname = usePathname();
   const [activeId, setActiveId] = useState<NavItemId>("home");
 
   useEffect(() => {
+    const routeActive = getActiveFromPath(pathname);
+    if (routeActive) {
+      setActiveId(routeActive);
+      return;
+    }
+
+    if (pathname !== "/") {
+      setActiveId("home");
+      return;
+    }
+
     let ticking = false;
 
     const update = () => {
@@ -59,7 +90,7 @@ export function useActiveSection() {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
     };
-  }, []);
+  }, [pathname]);
 
   return activeId;
 }

@@ -5,19 +5,26 @@ import { useScroll, useTransform, motion, AnimatePresence } from "framer-motion"
 import Overlay from "./Overlay";
 import { FRAME_COUNT } from "@/lib/sequence/config";
 import { drawFrameCover } from "@/lib/sequence/drawFrame";
-import { createSequenceLoader } from "@/lib/sequence/loadSequence";
+import type { SequenceLoaderCallbacks } from "@/lib/sequence/loadSequence";
+import {
+  acquireSequenceLoader,
+  isSequenceRevealReady,
+  isSequenceWarm,
+  releaseSequenceLoader,
+} from "@/lib/sequence/sequence-session";
 
 export default function ScrollyCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const loaderRef = useRef<ReturnType<typeof createSequenceLoader> | null>(null);
+  const loaderRef = useRef<ReturnType<typeof acquireSequenceLoader> | null>(null);
   const drawnIndexRef = useRef(-1);
   const firstPaintRef = useRef(false);
-  const revealReadyRef = useRef(false);
+  const revealReadyRef = useRef(isSequenceRevealReady());
 
-  const [loadProgress, setLoadProgress] = useState(0);
-  const [showHero, setShowHero] = useState(false);
-  const [isFullyLoaded, setIsFullyLoaded] = useState(false);
+  const warm = isSequenceWarm();
+  const [loadProgress, setLoadProgress] = useState(warm ? 100 : 0);
+  const [showHero, setShowHero] = useState(warm);
+  const [isFullyLoaded, setIsFullyLoaded] = useState(warm);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -66,11 +73,12 @@ export default function ScrollyCanvas() {
   useEffect(() => {
     resizeCanvas();
 
-    const loader = createSequenceLoader({
+    const callbacks: SequenceLoaderCallbacks = {
       onProgress: setLoadProgress,
       onHeroReady: () => {
         resizeCanvas();
-        if (paintFrame(0, loader)) {
+        const loader = loaderRef.current;
+        if (loader && paintFrame(0, loader)) {
           drawnIndexRef.current = 0;
           firstPaintRef.current = true;
           tryReveal();
@@ -81,11 +89,24 @@ export default function ScrollyCanvas() {
         tryReveal();
       },
       onFullyLoaded: () => setIsFullyLoaded(true),
-    });
+    };
 
+    const loader = acquireSequenceLoader(callbacks);
     loaderRef.current = loader;
-    return () => loader.cancel();
-  }, [tryReveal, paintFrame, resizeCanvas]);
+
+    if (warm) {
+      revealReadyRef.current = isSequenceRevealReady();
+      if (paintFrame(0, loader)) {
+        drawnIndexRef.current = 0;
+        firstPaintRef.current = true;
+        tryReveal();
+      }
+    }
+
+    return () => {
+      releaseSequenceLoader(callbacks);
+    };
+  }, [tryReveal, paintFrame, resizeCanvas, warm]);
 
   useEffect(() => {
     resizeCanvas();
@@ -93,7 +114,6 @@ export default function ScrollyCanvas() {
     return () => window.removeEventListener("resize", resizeCanvas);
   }, [resizeCanvas]);
 
-  // Paint loop — starts as soon as frame 0 is decoded (before full reveal)
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -136,15 +156,18 @@ export default function ScrollyCanvas() {
     };
   }, [frameIndex, tryReveal]);
 
+  const showLoader = !showHero;
+
   return (
     <>
       <AnimatePresence>
-        {!showHero && (
+        {showLoader && (
           <motion.div
             key="sequence-loader"
-            initial={{ opacity: 1 }}
+            initial={{ opacity: warm ? 0 : 1 }}
+            animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: warm ? 0.2 : 0.5, ease: [0.22, 1, 0.36, 1] }}
             className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-[#121212]"
           >
             <div className="text-white text-xl font-light tracking-widest mb-4">
@@ -181,7 +204,7 @@ export default function ScrollyCanvas() {
             className="absolute inset-0 z-10 bg-black/40"
             initial={false}
             animate={{ opacity: showHero ? 1 : 0 }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: warm ? 0.25 : 0.6, ease: [0.22, 1, 0.36, 1] }}
           />
 
           {showHero && <Overlay scrollYProgress={scrollYProgress} />}
