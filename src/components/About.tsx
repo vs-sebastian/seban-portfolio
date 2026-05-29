@@ -2,6 +2,9 @@
 
 import React from "react";
 import { motion } from "framer-motion";
+import SafeImage from "@/components/media/SafeImage";
+
+const ABOUT_IMAGE_SRC = "/my profile images/seb_about_img.webp";
 
 export default function About() {
   return (
@@ -43,23 +46,26 @@ export default function About() {
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
-          className="flex-1 w-full aspect-[4/5] relative rounded-3xl overflow-hidden glass border border-white/10 flex items-center justify-center group"
+          className="flex-1 w-full aspect-[4/5] relative rounded-3xl overflow-hidden glass border border-white/10 group shadow-[0_24px_80px_rgba(0,0,0,0.45)]"
         >
-          {/* Subtle noise over a gradient background for an artistic feel */}
-          <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a1a] to-[#0a0a0a]" />
-          <div className="noise opacity-[0.03]" />
-          
-          {/* Abstract geometric shapes to represent creativity and structure */}
-          <div className="relative z-10 w-3/4 h-3/4 flex flex-col items-center justify-center space-y-6">
-             <motion.div 
-               animate={{ rotate: 360 }}
-               transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
-               className="w-48 h-48 rounded-full border-[1px] border-white/20 border-t-white/60 relative"
-             >
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full border-[1px] border-white/10" />
-             </motion.div>
-          </div>
-          
+          <div
+            className="absolute -inset-4 bg-blue-500/10 rounded-[2rem] blur-3xl opacity-60 pointer-events-none"
+            aria-hidden
+          />
+
+          <SafeImage
+            src={ABOUT_IMAGE_SRC}
+            alt="Sebastian VS — designer portrait"
+            fill
+            sizes="(max-width: 768px) 100vw, 50vw"
+            className="object-cover object-center transition-transform duration-700 group-hover:scale-[1.02]"
+            priority={false}
+          />
+
+          <div className="absolute inset-0 bg-gradient-to-t from-[#121212]/90 via-[#121212]/20 to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-indigo-900/15 pointer-events-none" />
+          <div className="noise opacity-[0.04] pointer-events-none" />
+          <div className="absolute inset-0 ring-1 ring-inset ring-white/10 pointer-events-none" />
         </motion.div>
         
       </div>
