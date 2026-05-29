@@ -2,6 +2,9 @@
 
 import React from "react";
 import { motion } from "framer-motion";
+import SafeImage from "@/components/media/SafeImage";
+
+const VIOLIN_IMAGE_SRC = "/my profile images/seb_with_violin.webp";
 
 const interests = [
   { label: "Music & Production", desc: "Violin, Guitar, Piano & Music Production" },
@@ -24,31 +27,25 @@ export default function Creative() {
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 1, ease: "easeOut" }}
-          className="flex-1 w-full aspect-square md:aspect-[4/3] relative rounded-3xl overflow-hidden glass border border-white/10"
+          className="flex-1 w-full aspect-square md:aspect-[4/3] relative rounded-3xl overflow-hidden glass border border-white/10 group shadow-[0_24px_80px_rgba(0,0,0,0.45)]"
         >
-          <div className="absolute inset-0 bg-gradient-to-tr from-[#121212] to-[#1e1e1e]" />
-          <div className="noise opacity-[0.03]" />
-          
-          {/* Abstract creative visualization */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <motion.div
-                key={i}
-                animate={{ 
-                  scale: [1, 1.2, 1],
-                  opacity: [0.3, 0.6, 0.3],
-                  rotate: [0, 90, 180]
-                }}
-                transition={{ 
-                  duration: 8 + i * 2, 
-                  repeat: Infinity, 
-                  ease: "easeInOut" 
-                }}
-                className="absolute w-full h-full border border-white/5 rounded-full"
-                style={{ width: `${i * 20}%`, height: `${i * 20}%` }}
-              />
-            ))}
-          </div>
+          <div
+            className="absolute -inset-4 bg-purple-500/10 rounded-[2rem] blur-3xl opacity-60 pointer-events-none"
+            aria-hidden
+          />
+
+          <SafeImage
+            src={VIOLIN_IMAGE_SRC}
+            alt="Sebastian VS with violin — beyond the screen"
+            fill
+            sizes="(max-width: 768px) 100vw, 50vw"
+            className="object-cover object-center transition-transform duration-700 group-hover:scale-[1.02]"
+          />
+
+          <div className="absolute inset-0 bg-gradient-to-t from-[#121212]/90 via-[#121212]/25 to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 via-transparent to-blue-900/10 pointer-events-none" />
+          <div className="noise opacity-[0.04] pointer-events-none" />
+          <div className="absolute inset-0 ring-1 ring-inset ring-white/10 pointer-events-none" />
         </motion.div>
 
         <motion.div 
