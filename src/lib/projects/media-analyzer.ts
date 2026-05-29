@@ -69,14 +69,35 @@ export function inferLayout(
   return category.layout;
 }
 
+/** True when the basename ends with `_thumb` (before the extension). */
+export function isThumbnailFileName(fileName: string): boolean {
+  const base = fileName.replace(/\.[^.]+$/, "");
+  return /_thumb$/i.test(base);
+}
+
+/** Normalized key for pairing `name_thumb.jpg` with `name.jpg`. */
+export function thumbnailPairKey(fileName: string): string {
+  return fileName
+    .replace(/\.[^.]+$/, "")
+    .replace(/_thumb$/i, "")
+    .toLowerCase()
+    .trim();
+}
+
+/**
+ * Prefer explicit `_thumb` assets for card previews; fall back to legacy heuristics.
+ */
 export function pickCover(assets: MediaAsset[]): MediaAsset | null {
   if (assets.length === 0) return null;
 
   const images = assets.filter((a) => a.kind === "image");
   const pool = images.length > 0 ? images : assets;
 
+  const thumbAsset = pool.find((a) => isThumbnailFileName(a.fileName));
+  if (thumbAsset) return thumbAsset;
+
   const preferred = pool.find((a) =>
-    /cover|hero|thumb|home|landing|main/i.test(a.fileName)
+    /cover|hero|home|landing|main/i.test(a.fileName)
   );
   if (preferred) return preferred;
 
@@ -87,6 +108,22 @@ export function pickCover(assets: MediaAsset[]): MediaAsset | null {
   });
 
   return sorted[0] ?? pool[0];
+}
+
+/**
+ * Omit `_thumb` files from immersive galleries when a full-size sibling exists.
+ */
+export function filterGalleryMedia(media: MediaAsset[]): MediaAsset[] {
+  const fullKeys = new Set(
+    media
+      .filter((a) => !isThumbnailFileName(a.fileName))
+      .map((a) => thumbnailPairKey(a.fileName))
+  );
+
+  return media.filter((a) => {
+    if (!isThumbnailFileName(a.fileName)) return true;
+    return !fullKeys.has(thumbnailPairKey(a.fileName));
+  });
 }
 
 export function buildTags(
