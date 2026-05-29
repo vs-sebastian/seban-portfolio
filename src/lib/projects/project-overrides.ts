@@ -13,11 +13,14 @@ export const PROJECT_OVERRIDES: Record<string, ProjectOverride> = {
     categoryTitle: "UI DEVELOPMENT",
     title: "Sebastian VS — Cinematic Next.js Portfolio",
     description:
-      "A cinematic scrollytelling portfolio engineered with Next.js, TypeScript, Framer Motion, and HTML5 Canvas — featuring frame-synced hero sequences, immersive glassmorphism UI, dynamic media architecture, and premium interactive storytelling.",
+      "A cinematic interactive portfolio built with Next.js.",
     tags: ["Next.js", "TypeScript", "Framer Motion", "HTML5 Canvas"],
   },
   "videos/fusion-treats-ad": {
     title: "Fusion Treats Advertisement",
+  },
+  "ui-ux-product-design/value-stram-mapping-vsm-ui-ux-design": {
+    title: "Value Stream Mapping (VSM)",
   },
 };
 

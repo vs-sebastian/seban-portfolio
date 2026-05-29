@@ -6,8 +6,10 @@ import { SKIP_FOLDER_PATTERN } from "./constants";
 import type { CategoryDefinition } from "./constants";
 import {
   buildTags,
+  filterGalleryMedia,
   getMediaKind,
   inferLayout,
+  isThumbnailFileName,
   orientationFromDimensions,
   pickCover,
 } from "./media-analyzer";
@@ -188,9 +190,13 @@ function buildProjectFromMedia(
 ): Project | null {
   if (media.length === 0) return null;
 
+  const cover = pickCover(media);
+  const galleryMedia = filterGalleryMedia(media);
+  const displayMedia = galleryMedia.length > 0 ? galleryMedia : media;
+
   const layout = inferLayout(
     category,
-    media.map((m) => ({ kind: m.kind, relativePath: m.src }))
+    displayMedia.map((m) => ({ kind: m.kind, relativePath: m.src }))
   );
 
   return applyProjectOverrides({
@@ -199,14 +205,43 @@ function buildProjectFromMedia(
     categorySlug: category.slug,
     categoryTitle: category.title,
     layout,
-    cover: pickCover(media),
-    mediaCount: media.length,
+    cover,
+    mediaCount: displayMedia.length,
     description:
       description ??
-      `${category.title} — ${media.length} asset${media.length === 1 ? "" : "s"}.`,
+      `${category.title} — ${displayMedia.length} asset${displayMedia.length === 1 ? "" : "s"}.`,
     tags: buildTags(category, layout, title),
-    media,
+    media: displayMedia,
   });
+}
+
+function pickCategoryCover(
+  category: CategoryDefinition,
+  categoryPath: string,
+  projects: Project[]
+): MediaAsset | null {
+  if (fs.existsSync(categoryPath)) {
+    for (const entry of fs.readdirSync(categoryPath, { withFileTypes: true })) {
+      if (!entry.isFile() || !isThumbnailFileName(entry.name)) continue;
+      if (getMediaKind(entry.name) !== "image") continue;
+
+      const asset = buildAsset(
+        path.join(categoryPath, entry.name),
+        `images/projects/${category.folderName}/${entry.name}`,
+        0
+      );
+      if (asset && assetExistsOnDisk(asset.src)) return asset;
+    }
+  }
+
+  const thumbCover = projects.find(
+    (p) => p.cover && isThumbnailFileName(p.cover.fileName)
+  )?.cover;
+  if (thumbCover) return thumbCover;
+
+  return (
+    projects.find((p) => p.cover && assetExistsOnDisk(p.cover.src))?.cover ?? null
+  );
 }
 
 function buildProjectFromFolder(
@@ -416,10 +451,6 @@ function loadAll(): void {
     const projects = parseCategoryFolder(def, categoryPath);
     allProjects.push(...projects);
 
-    const coverProject = projects.find(
-      (p) => p.cover && assetExistsOnDisk(p.cover.src)
-    );
-
     return {
       slug: def.slug,
       title: def.title,
@@ -427,7 +458,7 @@ function loadAll(): void {
       layout: def.layout,
       folderName: def.folderName,
       projectCount: projects.length,
-      cover: coverProject?.cover ?? null,
+      cover: pickCategoryCover(def, categoryPath, projects),
     };
   });
 
@@ -493,6 +524,7 @@ export function getFeaturedProjects(limit = 6): ProjectSummary[] {
   const picked: ProjectSummary[] = [];
   const preferredByCategory: Record<string, string> = {
     videos: "fusion-treats-ad",
+    "ui-ux-product-design": "value-stram-mapping-vsm-ui-ux-design",
   };
   const portfolio = getAllProjects().find(
     (p) =>

@@ -40,13 +40,26 @@ export default function Footer() {
           
           <div className="flex flex-col items-center md:items-center space-y-2">
             <span className="text-white/80 font-medium mb-2">Connect</span>
-            <a href="mailto:hello@example.com" className="hover:text-white transition-colors duration-300">
+            <a
+              href="mailto:vssebastian723@gmail.com"
+              className="hover:text-white transition-colors duration-300"
+            >
               Email
             </a>
-            <a href="#" className="hover:text-white transition-colors duration-300">
+            <a
+              href="https://www.linkedin.com/in/sebastian-vs-0407a7292?utm_source=share_via&utm_content=profile&utm_medium=member_android"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-white transition-colors duration-300"
+            >
               LinkedIn
             </a>
-            <a href="#" className="hover:text-white transition-colors duration-300">
+            <a
+              href="https://www.behance.net/sebastianvs3"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-white transition-colors duration-300"
+            >
               Behance
             </a>
           </div>
